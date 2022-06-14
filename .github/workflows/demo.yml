@@ -1,0 +1,50 @@
+name: GitHub Actions - Databricks demo
+on: [push]
+
+env:
+  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+jobs:
+
+  db_demo:
+    runs-on: ubuntu-latest
+    outputs:
+      jobs_out: ${{ steps.get_jobs.outputs.jobs_out }}
+      num_jobs: ${{ steps.get_jobs.outputs.num_jobs }}
+
+    steps:
+
+    - name: install databricks-cli
+      run: |
+        pip install databricks-cli
+
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: get jobs
+      id: get_jobs
+      run: |
+        JOBS_OUT=$(databricks jobs list | grep "Multi-task-job")
+        NUM_JOBS=$( echo $JOBS_OUT | wc -l | tr -d " \t")
+        JOB_ID=$(echo $JOBS_OUT | grep -o -E '[0-9]+')
+        echo "::set-output name=jobs_id::$JOB_ID"
+        echo "::set-output name=num_jobs::$NUM_JOBS"
+
+    - name: create job
+      if: ${{ needs.db_demo.outputs.num_jobs }} == 0
+      run: |
+        databricks jobs create --json-file jobSpec.json
+    
+    - name: update job
+      if: ${{ needs.db_demo.outputs.num_jobs }} == 1
+      run: |
+        ${{ needs.db_demo.outputs.jobs_out }}
+        databricks jobs reset --job-id ${{ needs.db_demo.outputs.jobs_id }} --json-file jobSpec.json
+
+    - name: run workflow
+      run: |
+        databricks jobs run-now ${{ needs.db_demo.outputs.jobs_id }}
+
+    
+
