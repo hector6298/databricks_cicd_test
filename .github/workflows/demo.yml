@@ -45,7 +45,7 @@ jobs:
         job = jobs[0].split(' ')
         if job[1] == "Multi-task-job":
           job_id = job[0]
-        print(f"::set-output name=job_id::{job_id}")
+          print(f"::set-output name=jobs_id::{job_id}")
       shell: python
 
     - name: outputs
