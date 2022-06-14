@@ -9,10 +9,6 @@ jobs:
 
   db_demo:
     runs-on: ubuntu-latest
-    outputs:
-      jobs_out: ${{ steps.get_jobs.outputs.jobs_id }}
-      num_jobs: ${{ steps.get_jobs.outputs.num_jobs }}
-
     steps:
 
     - name: install databricks-cli
@@ -23,7 +19,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: create job
-      if: steps.get_jobs_info.outputs.num_jobs == '0'
+      id: create_job
       run: |
         JOB_OUT=$(databricks jobs create --json-file jobSpec.json)
         JOB_ID=$(echo $JOB_OUT | jq '.job_id')
@@ -31,7 +27,7 @@ jobs:
 
     - name: run workflow
       run: |
-        databricks jobs run-now --job-id ${{ steps.get_jobs_info.outputs.jobs_id }}
+        databricks jobs run-now --job-id ${{ steps.create_job.outputs.jobs_id }}
 
     
 
