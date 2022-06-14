@@ -10,7 +10,7 @@ jobs:
   db_demo:
     runs-on: ubuntu-latest
     outputs:
-      jobs_out: ${{ steps.get_jobs.outputs.jobs_out }}
+      jobs_out: ${{ steps.get_jobs.outputs.jobs_id }}
       num_jobs: ${{ steps.get_jobs.outputs.num_jobs }}
 
     steps:
