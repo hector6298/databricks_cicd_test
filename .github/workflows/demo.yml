@@ -22,46 +22,12 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
 
-    - name: get jobs
-      id: get_jobs
-      run: |
-        echo "JOBS_OUT=$(databricks jobs list)" >> $GITHUB_ENV
-    
-    - name: get number of jobs
-      id: get_num_jobs
-      run: |
-        import os
-        jobs = os.environ['JOBS_OUT'].split('\n')
-        num_jobs = len(jobs)
-        print(f"::set-output name=num_jobs::{num_jobs}")
-      shell: python
-
-    - name: get job info
-      id: get_jobs_info
-      if: steps.get_num_jobs.outputs.num_jobs > '0'
-      run: |
-        import os
-        jobs = os.environ['JOBS_OUT'].split('\n')
-        job = jobs[0].split(' ')
-        if job[1] == "Multi-task-job":
-          job_id = job[0]
-          print(f"::set-output name=jobs_id::{job_id}")
-      shell: python
-
-    - name: outputs
-      run: echo ${{ steps.get_jobs_info.outputs.num_jobs }}
-
     - name: create job
       if: steps.get_jobs_info.outputs.num_jobs == '0'
       run: |
         JOB_OUT=$(databricks jobs create --json-file jobSpec.json)
         JOB_ID=$(echo $JOB_OUT | jq '.job_id')
         echo "::set-output name=jobs_id::$JOB_ID"
-    
-    - name: update job
-      if: steps.get_jobs_info.outputs.num_jobs == '1'
-      run: |
-        databricks jobs reset --job-id ${{ steps.get_jobs_info.outputs.jobs_id }} --json-file jobSpec.json
 
     - name: run workflow
       run: |
