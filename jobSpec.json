@@ -7,7 +7,7 @@
         "description": "task1 description",
         "notebook_task": {
           "notebook_path": "/Repos/mejia_vallejo@hotmail.com/cicd/task",
-          "notebook_params": {
+          "base_parameters": {
               "task_id": "1"
           }
         },
@@ -25,7 +25,7 @@
         "description": "task 2 description",
         "notebook_task": {
           "notebook_path": "/Repos/mejia_vallejo@hotmail.com/cicd/task",
-          "notebook_params": {
+          "base_parameters": {
               "task_id": "2"
           }
         },
@@ -48,7 +48,7 @@
         "description": "task3 description",
         "notebook_task": {
           "notebook_path": "/Repos/mejia_vallejo@hotmail.com/cicd/task",
-          "notebook_params": {
+          "base_parameters": {
               "task_id": "3"
           }
         },
