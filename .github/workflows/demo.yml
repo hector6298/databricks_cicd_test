@@ -37,7 +37,9 @@ jobs:
     - name: create job
       if: steps.get_jobs.outputs.num_jobs == '0'
       run: |
-        databricks jobs create --json-file jobSpec.json
+        JOB_OUT=$(databricks jobs create --json-file jobSpec.json)
+        JOB_ID=$(echo $JOB_OUT | jq '.job_id')
+        echo "::set-output name=jobs_id::$JOB_ID"
     
     - name: update job
       if: steps.get_jobs.outputs.num_jobs == '1'
@@ -46,7 +48,7 @@ jobs:
 
     - name: run workflow
       run: |
-        databricks jobs run-now ${{ steps.get_jobs.outputs.jobs_id }}
+        databricks jobs run-now --job-id ${{ steps.get_jobs.outputs.jobs_id }}
 
     
 
