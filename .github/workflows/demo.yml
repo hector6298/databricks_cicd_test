@@ -37,7 +37,7 @@ jobs:
       shell: python
 
     - name: get job info
-      id: get_job_info
+      id: get_jobs_info
       if: steps.get_num_jobs.outputs.num_jobs > '0'
       run: |
         import os
