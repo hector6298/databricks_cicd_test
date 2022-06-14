@@ -25,30 +25,39 @@ jobs:
     - name: get jobs
       id: get_jobs
       run: |
-        JOBS_OUT=$(databricks jobs list | grep "Multi-task-job")
-        NUM_JOBS=$( echo $JOBS_OUT | wc -l | tr -d " \t")
-        JOB_ID=$(echo $JOBS_OUT | grep -o -E '[0-9]+')
-        echo "::set-output name=jobs_id::$JOB_ID"
-        echo "::set-output name=num_jobs::$NUM_JOBS"
+        echo "JOBS_OUT=$(databricks jobs list --output json)" >> $GITHUB_ENV
+    
+    - name: get number of jobs
+      id: get_jobs_info
+      run: |
+        import os
+        jobs = os.environ['JOBS_OUT']
+        num_jobs = len(jobs)
+        print(f"::set-output name=num_jobs::{num_jobs}")
+        job = jobs[0]
+        if job["settings"]["name"] == "Multi-task-job":
+          job_id = job["job_id"]
+        print(f"::set-output name=job_id::{job_id}")
+      shell: python
 
     - name: outputs
-      run: echo ${{ steps.get_jobs.outputs.num_jobs }}
+      run: echo ${{ steps.get_jobs_info.outputs.num_jobs }}
 
     - name: create job
-      if: steps.get_jobs.outputs.num_jobs == '0'
+      if: steps.get_jobs_info.outputs.num_jobs == '0'
       run: |
         JOB_OUT=$(databricks jobs create --json-file jobSpec.json)
         JOB_ID=$(echo $JOB_OUT | jq '.job_id')
         echo "::set-output name=jobs_id::$JOB_ID"
     
     - name: update job
-      if: steps.get_jobs.outputs.num_jobs == '1'
+      if: steps.get_jobs_info.outputs.num_jobs == '1'
       run: |
-        databricks jobs reset --job-id ${{ steps.get_jobs.outputs.jobs_id }} --json-file jobSpec.json
+        databricks jobs reset --job-id ${{ steps.get_jobs_info.outputs.jobs_id }} --json-file jobSpec.json
 
     - name: run workflow
       run: |
-        databricks jobs run-now --job-id ${{ steps.get_jobs.outputs.jobs_id }}
+        databricks jobs run-now --job-id ${{ steps.get_jobs_info.outputs.jobs_id }}
 
     
 
